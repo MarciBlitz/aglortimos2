@@ -20,7 +20,7 @@ public class Pelicula {
     int anno;
     //ArrayList<Valoracion> valoraciones;
     HashMap<Long,Valoracion> valoraciones;
-    float notamedia;
+    double notamedia;
     
     Pelicula(){
         valoraciones=new HashMap<>();
@@ -30,11 +30,12 @@ public class Pelicula {
         id=aid;
         nombre=anombre;
         anno=aanno;
+        notamedia = 0;
     };
     void addvaloracion(Valoracion e){valoraciones.put(e.iduser,e);};
     Map<Long,Valoracion> getValoraciones(){return valoraciones;}
     long getIdPelicula(){return id;}
-    float getMedia(){return notamedia;}
+    double getMedia(){return notamedia;}
     String getTitulo(){return nombre;}
-    void setMedia(float media){notamedia=media;}
+    void setMedia(double media){notamedia=media;}
 }

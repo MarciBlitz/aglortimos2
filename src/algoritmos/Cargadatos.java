@@ -13,16 +13,32 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Pc
  */
 public class Cargadatos{
-
+    /*ArrayList<Pelicula> pelis;
+    ArrayList<Usuario> usuarios;
+    HashMap mapausuarios;
+    String archivopelis;
+    String archivovaloraciones;
+    Test test;
+    */
     /**
-     * @param args the command line arguments
+     * 
      */
+    public Cargadatos(){
+       
+    }
     public static void cargarpeliculas(String archivo, ArrayList<Pelicula> pelis)
     {
         BufferedReader br = null;
@@ -69,7 +85,7 @@ public class Cargadatos{
                 br2 = new BufferedReader(new FileReader(archivo));
                 line2 = br2.readLine(); //para quitar la linea de cabecera
                 Valoracion tempv;
-                System.out.println("cargando valoracione...");
+                System.out.println("cargando valoraciones...");
 		while ((line2 = br2.readLine()) != null) {
                         String[] cadenavaloracion = line2.split(",");
                         int indice = Integer.parseInt(cadenavaloracion[1]);
@@ -78,10 +94,11 @@ public class Cargadatos{
                         pelis.get(indice-1).addvaloracion(tempv);
                         
                         if(mapausu.containsKey(indiceusu)){
-                            usuarios.get((int) mapausu.get(indiceusu)).valoraciones.put(tempv.idpeli, tempv);
+                            usuarios.get((int) mapausu.get(indiceusu)).getValoraciones().put(tempv.getIdPelicula(), tempv);
                         }else{
                             mapausu.put(indiceusu, j);
                             usuarios.add(new Usuario(indiceusu));
+                            usuarios.get((int) mapausu.get(indiceusu)).getValoraciones().put(tempv.getIdPelicula(), tempv);
                             j++;
                         }
                         //System.out.println("usuario" + tempv.iduser+"|"+usuarios.get(indiceusu-1).id);
@@ -106,6 +123,43 @@ public class Cargadatos{
 		}
 	}
     }
+    public static void calcularMedias(ArrayList<Usuario> usuarios, ArrayList<Pelicula> peliculas) {
+        // 1. Calculo de la media de valoraciones para cada usuario
+        double numerador;
+        Iterator<Usuario> it1 = usuarios.iterator();
+        
+        Usuario u;
+        long i;
+        while(it1.hasNext()){
+            numerador = 0;
+            u = it1.next();
+            for(Map.Entry<Long,Valoracion> v : u.getValoraciones().entrySet()){
+                numerador += v.getValue().getValor();
+            }
+            u.setMedia(numerador/u.getValoraciones().size());
+            
+        }
+        
+        
+        // 2. Calculo de la media de valoraciones para cada pelicula
+        Iterator<Pelicula> it2 = peliculas.iterator();
+        Pelicula p;
+        while(it2.hasNext()){
+            numerador = 0;
+            i = 0;
+            p = it2.next();
+                for(Map.Entry<Long,Valoracion> v : p.getValoraciones().entrySet()){
+                    numerador += v.getValue().getValor();
+                    //System.out.println(v.getValue().getValor());
+                }
+                if(p.getValoraciones().size() == 0){
+                    p.setMedia(0);
+                }else{
+                    p.setMedia(numerador/p.getValoraciones().size());      
+                }
+           
+        }
+    }
     
     public static HashMap<Long, Double> cargarPelisHashMap(ArrayList<Pelicula> pelis){
         HashMap<Long,Double>pelishm = new HashMap();
@@ -114,55 +168,99 @@ public class Cargadatos{
         }
         return pelishm;
     }
-    
+
     public static void main(String[] args) throws ErrorDatoInvalido, IOException, ClassNotFoundException {
         // TODO code application logic here
-        ArrayList<Pelicula> pelis=new ArrayList<>(); //lista peliculas
-        ArrayList<Usuario> usuarios=new ArrayList<>(); //lista usuarios
+        final ArrayList<Pelicula> pelis=new ArrayList<>(); //lista peliculas
+        final ArrayList<Usuario> usuarios=new ArrayList<>(); //lista usuarios
         HashMap mapausuarios = new HashMap(); //para buscar la posicion de un usuario en el vector a partir de su id
-        String archivopelis = "/home/jose/NetBeansProjects/aglortimos2/algoritmos2/src/algoritmos/peliculas2.csv";
-	String archivovaloraciones = "/home/jose/NetBeansProjects/aglortimos2/algoritmos2/src/algoritmos/ratings7.csv";
+        String archivopelis = "src/algoritmos/peliculas2.csv";
+	String archivovaloraciones = "src/algoritmos/ratings7.csv";
+        final Test test = new Test();
 	
         cargarpeliculas(archivopelis, pelis);
         cargarvaloraciones(archivovaloraciones, pelis, usuarios, mapausuarios);
-        
-       Algoritmos_similitud as = new Algoritmos_similitud();
-        
-       as.ejecucionTrainingCoseno(3, pelis);
-        /*for (int i = 0; i < 5; ++i){
-            try {
-                //ejecucionTraining(k,algSim,i);
-                System.out.println("ESTADO:  k = 3, ciclo = "+i);
-                as.ejecucionTrainingCoseno(3, pelis);
-            } catch (    ErrorDatoInvalido | IOException ex) {
-                
-            }
-        }*/
-        
-        
-        
-        //Algoritmos_pred ap = new Algoritmos_pred();
-   
-        //System.out.println(pelis.get(1000).valoraciones.get(0).estrellas);
- 
-        //Test t = new Test("/results.txt");
+        calcularMedias(usuarios,pelis);
        
-        //int n=10;
-        //t.ejecucionTest(3, 0, 1, n, usuarios, pelis);
+        ///*******************TRAININGS
+        /*
+        ExecutorService exec = Executors.newFixedThreadPool(5);
+        ExecutorService exec2 = Executors.newFixedThreadPool(5);
+        for (int k = 10; k <= 30; k+=10) {
+            //...execute the task to run concurrently as a runnable:
+            final int i = k;
+            
+            exec.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Running in: " + Thread.currentThread());
+                    try {
+                        // do the work to be done in its own thread
+                        test.training(i, 0, usuarios, pelis);
+                    } catch (            IOException | ErrorDatoInvalido ex) {
+                        Logger.getLogger(Cargadatos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    
+                }
+            });
+            exec2.execute(new Runnable(){
+                @Override
+                public void run(){
+                    try {
+                        test.training(i, 1, usuarios, pelis);
+                    } catch (            IOException | ErrorDatoInvalido ex) {
+                        Logger.getLogger(Cargadatos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+            
+            
+        }
+        //Tell the executor that after these 100 steps above, we will be done: 
+        exec.shutdown();
+        exec2.shutdown();
+        try {
+            // The tasks are now running concurrently. We wait until all work is done, 
+            // with a timeout of 50 seconds:
+            boolean b = exec.awaitTermination(60, TimeUnit.MINUTES);
+            boolean C = exec2.awaitTermination(60, TimeUnit.MINUTES);
+            // If the execution timed out, false is returned:
+            System.out.println("All done: " + b);
+        } catch (InterruptedException e) {}
+        */
+        ///**********************TESTS
+        
+        for(int k=10;k<=30;k+=10){
+            System.out.println("K = "+k);
+            //Coseno + I+A con n = 0
+            test.ejecucionTest(k, 0, 0, 0, usuarios, pelis);
+            //Coseno + I+A con n = 2
+            
+            test.ejecucionTest(k, 0, 0, 2, usuarios, pelis);
+            //Coseno + I+A con n = 4
+            test.ejecucionTest(k, 0, 0, 4, usuarios, pelis);
+            //Coseno + I+A con n = 8
+            test.ejecucionTest(k, 0, 0, 8, usuarios, pelis);
+            //Coseno + WA
+            test.ejecucionTest(k, 0, 1, 0, usuarios, pelis);
+            //Pearson + I+A con n = 0
+            test.ejecucionTest(k, 1, 0, 0, usuarios, pelis);
+            //Pearson + I+A con n = 2
+            test.ejecucionTest(k, 1, 0, 2, usuarios, pelis);
+            //Pearson + I+A con n = 4
+            test.ejecucionTest(k, 1, 0, 4, usuarios, pelis);
+            //Pearson + I+A con n = 8
+            test.ejecucionTest(k, 1, 0, 8, usuarios, pelis);
+            //Coseno + WA
+            test.ejecucionTest(k, 1, 1, 0, usuarios, pelis);
+            
+        }
+       
         
 	System.out.println("Done");
         //______________________
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
     }
     
 }

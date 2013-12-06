@@ -11,5 +11,9 @@ package Excepciones;
  * @author Pc
  */
 public class ErrorDatoInvalido extends Exception {
+
+    public ErrorDatoInvalido(String _Método_ejecucion__Primer_parámetro_El_nú) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

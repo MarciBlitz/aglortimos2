@@ -16,6 +16,11 @@ public class Valoracion {
     long idpeli;
     
     Valoracion(int est, int usr, int peli){estrellas=est;iduser=usr;idpeli=peli;}
+    Valoracion(){
+        estrellas=0;
+        iduser = 0;
+        idpeli = 0;
+    }
     int getValor(){return estrellas;}
     long getIdPelicula(){return idpeli;}
 }

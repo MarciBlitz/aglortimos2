@@ -17,14 +17,14 @@ public class Usuario {
     String nombre;
     //ArrayList<Valoracion> valoraciones;
     HashMap<Long,Valoracion> valoraciones;
-    float notamedia;
+    double notamedia;
     
     Usuario(int indiceusu) {
         id=indiceusu; 
         valoraciones=new HashMap<>();
     }
     long getIdUsuario(){return id;}
-    float getMedia(){return notamedia;}
+    double getMedia(){return notamedia;}
     HashMap<Long,Valoracion> getValoraciones(){return valoraciones;}
-    void setMedia(float media){notamedia=media;}
+    void setMedia(double media){notamedia=media;}
 }

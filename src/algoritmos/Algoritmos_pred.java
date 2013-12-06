@@ -146,11 +146,11 @@ public class Algoritmos_pred {
     
     /**
      * Método para predecir la valoracion de un usuario sobre una película, teniendo en cuenta solo los vecinos más cercanos, utilizando el algoritmo de predicción IA+A.
+     * @param n
      * @param u Usuario
-     * @param idP identificador de la película a predecir.
+     * @param mediaP
      * @param vecinos Conjunto de vecinos más cercanos a la película a precedir.
      * @return Devuelve la valoracion estimada. Devuelve -1 si no se ha podido predecir
-     * @throws No se lanzan excepciones.
     */
     protected double calcularPrediccionIAmasA(int n, Usuario u, double mediaP, TreeSet<ItemSim> vecinos) {
         // Estructura con solamente las valoraciones que un usuario ha realizado sobre los k vecinos mas cercanos a idP
@@ -263,7 +263,7 @@ public class Algoritmos_pred {
         // 1.1. Se recorren los vecinos mas cercanos a idP
         //mostrarVecinos(vecinos);
         for(ItemSim i : vecinos){
-            // 1.2. Se comprueba si el usuario a valorado a dicho vecino
+            // 1.2. Se comprueba si el usuario ha valorado a dicho vecino
             if (u.getValoraciones().containsKey(i.getId())){
                 // 1.3. Si es así se almacena en la estructura valoracionesCercanas.
                 valoracionesCercanas.add(u.getValoraciones().get(i.getId()));
